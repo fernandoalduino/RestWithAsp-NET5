@@ -1,41 +1,77 @@
 using Microsoft.AspNetCore.Mvc;
+using RestWithASPNET.Models;
+using RestWithASPNET.Services;
 using System;
 
 namespace RestWithASPNET.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class CalculatorController : ControllerBase
+    [Route("api/[controller]")]
+    public class PersonController : ControllerBase
     {
 
-        private readonly ILogger<CalculatorController> _logger;
+        private readonly ILogger<PersonController> _logger;
 
-        public CalculatorController(ILogger<CalculatorController> logger)
+        private IPersonService _personService;
+
+        public PersonController(ILogger<PersonController> logger, IPersonService personService)
         {
             _logger = logger;
+            _personService = personService;
         }
 
-        [HttpGet("sum/{firstNumber}/{secondNumber}")]
-        public IActionResult Sum(string firstNumber, string secondNumber)
+        [HttpGet]
+        public IActionResult Get()
         {
-            return BadRequest("Invalid Input");
+            return Ok(_personService.GetAll());
         }
 
-        private decimal convertToDecimal(string number)
+        [HttpGet("{id}")]
+        public IActionResult Get(long id)
         {
-            decimal decimalValue;
-            if(decimal.TryParse(number, out decimalValue))
+            var person = _personService.FindById(id);
+            if (person == null)
             {
-                return decimalValue;
+                return NotFound();
             }
-            return 0;
+
+            return Ok(person);
         }
 
-        private bool isNumeric(string number)
+        [HttpPost]
+        public IActionResult Create([FromBody] Person person)
         {
-            double n;
-            bool isNumber = double.TryParse(number, System.Globalization.NumberStyles.Any, System.Globalization.NumberFormatInfo.InvariantInfo, out n);
-            return isNumber;
+            if (person == null)
+            {
+                return BadRequest("Person cannot be null");
+            }
+
+            return Ok(_personService.Create(person));
+        }
+
+        [HttpPut]
+        public IActionResult Update([FromBody] Person person)
+        {
+            if (person == null)
+            {
+                return BadRequest("Person cannot be null");
+            }
+
+            return Ok(_personService.Update(person));
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(long id)
+        {
+            var person = _personService.FindById(id);
+            if (person == null)
+            {
+                return BadRequest("Invalid Person");
+            }
+
+            _personService.Delete(id); // Void Method
+
+            return NoContent();
         }
     }
 }

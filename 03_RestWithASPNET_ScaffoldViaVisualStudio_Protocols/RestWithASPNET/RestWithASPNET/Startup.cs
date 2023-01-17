@@ -1,3 +1,6 @@
+using RestWithASPNET.Services;
+using RestWithASPNET.Services.Implementations;
+
 class Startup
 {
     public Startup(IConfiguration configuration)
@@ -7,7 +10,12 @@ class Startup
     public IConfiguration Configuration { get; }
 
     public void ConfigureServices(IServiceCollection services)
-    { }
+    { 
+        services.AddControllers();
+
+        // Dependency Injection
+        services.AddScoped<IPersonService, PersonServiceImplementation>();
+    }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment environment)
     { }
